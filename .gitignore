@@ -1,0 +1,6 @@
+.env
+invoice/
+*.ipynb_checkpoints/
+*__pycache__/
+*.nasdaq_key
+large_files/
