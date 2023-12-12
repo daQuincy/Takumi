@@ -5,3 +5,4 @@ invoice/
 *.nasdaq_key
 large_files/
 reference/
+outputs/
