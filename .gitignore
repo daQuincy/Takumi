@@ -4,3 +4,4 @@ invoice/
 *__pycache__/
 *.nasdaq_key
 large_files/
+reference/
