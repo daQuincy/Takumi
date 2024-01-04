@@ -30,22 +30,6 @@ def read_bm_data(file_path):
 
     return df_wti
 
-def plot_confusion_matrix(y_true, y_pred, title='', normalize=False):
-    if normalize:
-        cm = confusion_matrix(y_true, y_pred, normalize='pred')
-        sns.heatmap(cm, annot=True, fmt='.2f', cmap='Blues')
-    else:
-        cm = confusion_matrix(y_true, y_pred)
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
-
-    plt.title(title)
-    plt.ylabel('True')
-    plt.xlabel('Predicted')
-    plt.show()
-
-import matplotlib.pyplot as plt
-import numpy as np
-
 def plot_confusion_matrix(y_true, y_pred, class_names, title='Confusion Matrix', cmap=plt.cm.Blues, normalize=False):
     """
     Plots a confusion matrix with clear visualization.
