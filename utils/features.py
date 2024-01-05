@@ -3,8 +3,13 @@ import numpy as np
 
 from multiprocessing import Pool
 from functools import partial
+from typing import List
 
 import tqdm
+import pytz
+import ta
+
+ny_tz = pytz.timezone('America/New_York')
 
 def z_past(
     sr: pd.Series,
@@ -70,4 +75,74 @@ def compute_z_past(
     df_data = pd.DataFrame(df_data)
 
     return df_data
+
+
+def create_lag(
+    df: pd.DataFrame,
+    feature: str,
+    lag_hr: int,
+    lag_minute: int
+):
+    timestamp = df['datetime']
+    fast_forward_time = timestamp + pd.Timedelta(hours=lag_hr, minutes=lag_minute)
+    fast_forward_time = fast_forward_time.dt.tz_convert(ny_tz)
+
+    feature_name = 'lag'
+    if lag_hr != 0: feature_name = f'{feature_name}{lag_hr}hr'
+    if lag_minute != 0: feature_name = f'{feature_name}{lag_minute}m'
+    feature_name = f'{feature_name}_{feature}'
+
+    df_lag = pd.DataFrame({'datetime': fast_forward_time, feature_name: df['z_15m']})
+    df = pd.merge(df, df_lag, on='datetime', how='left')
+    df[feature_name] = df[feature_name].fillna(0)
+
+    return df
+
+def create_rsi(
+    df: pd.DataFrame,
+    periods: List[int]
+):
+    df_result = []
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D'))):
+        if df_day.shape[0] == 0:
+            continue
+        
+        for period in periods:
+            df_day[f'rsi_{period}'] = ta.momentum.rsi(close=df_day['close'], window=period).copy()
+
+        df_result.append(df_day)
+
+    df_result = pd.concat(df_result)
     
+    return df_result
+
+def create_dst(
+    df: pd.DataFrame,
+    period_minutes: List[int],
+    feature: str = 'close'
+):
+    """
+    Distance of current close price to the high of the past <period minute>
+    """
+
+    df_result = []
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D'))):
+        if df_day.shape[0] == 0:
+            continue
+        
+        feature_value = df[feature].copy()
+        for period_minute in period_minutes:
+            high = df_day[feature].rolling(period_minute).max().copy()
+            low = df_day[feature].rolling(period_minute).min().copy()
+            mean = df_day[feature].rolling(period_minute).mean().copy()
+            df_day[f'dst_high_{period_minute}m'] = (feature_value - high) / high
+            df_day[f'dst_low_{period_minute}m'] = (feature_value - low) / low
+            df_day[f'dst_mean_{period_minute}m'] = (feature_value - mean) / mean
+            df_day[f'dst_mean_high_{period_minute}m'] = (mean - high) / high
+            df_day[f'dst_mean_low_{period_minute}m'] = (mean - low) / low
+
+        df_result.append(df_day)
+
+    df_result = pd.concat(df_result)
+
+    return df_result

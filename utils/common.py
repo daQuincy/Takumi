@@ -68,3 +68,8 @@ def plot_confusion_matrix(y_true, y_pred, class_names, title='Confusion Matrix',
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
     plt.show()
+
+def create_correlation_heatmap(df):
+    correlations = df.corr()
+    sns.heatmap(correlations, annot=True, cmap='coolwarm')
+    plt.show()
