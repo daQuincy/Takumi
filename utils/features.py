@@ -92,7 +92,7 @@ def create_lag(
     if lag_minute != 0: feature_name = f'{feature_name}{lag_minute}m'
     feature_name = f'{feature_name}_{feature}'
 
-    df_lag = pd.DataFrame({'datetime': fast_forward_time, feature_name: df['z_15m']})
+    df_lag = pd.DataFrame({'datetime': fast_forward_time, feature_name: df[feature]})
     df = pd.merge(df, df_lag, on='datetime', how='left')
     df[feature_name] = df[feature_name].fillna(0)
 
