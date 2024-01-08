@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+import json
 import pytz
 
 def read_bm_data(file_path):
@@ -73,3 +74,7 @@ def create_correlation_heatmap(df):
     correlations = df.corr()
     sns.heatmap(correlations, annot=True, cmap='coolwarm')
     plt.show()
+
+def print_json(data):
+    data = json.dumps(data, indent=2)
+    print(data)
