@@ -1,13 +1,47 @@
 import xgboost as xgb
 import matplotlib.pyplot as plt
+import pandas as pd
 
-from utils.common import print_json
-from typing import List, Tuple, Dict
+from utils.common import print_dictionary_tree
+from typing import List, Tuple, Dict, Iterable
 from sklearn.metrics import accuracy_score, precision_score, \
     recall_score, f1_score, classification_report
+from sklearn.dummy import DummyClassifier
+from tabulate import tabulate
 
-class XGBoostClassifier:
+class BaseClassifier:
+    def __init__(self):
+        self.model = None
+    
+    def eval(self, X, y, target_names=None):
+        y_pred = self.model.predict(X)
+        eval_results = [
+            accuracy_score(y, y_pred),
+            precision_score(y, y_pred, average="weighted"),
+            recall_score(y, y_pred, average="weighted"),
+            f1_score(y, y_pred, average="weighted")
+        ]
+        print(tabulate(pd.DataFrame(eval_results, index=['accuracy', 'precision', 'recall', 'f1']).round(2), tablefmt='psql'))
+        # print(classification_report(y, y_pred, target_names=target_names))
+
+    def fit(self, train_set: Tuple, val_set: Tuple, target_names: Iterable = None):
+        Xtr, ytr = train_set
+        Xvl, yvl = val_set
+        self.model.fit(Xtr, ytr)
+        print('Training Results:')
+        self.eval(Xtr, ytr, target_names)
+        print('\nValidation Results:')
+        self.eval(Xvl, yvl, target_names)
+
+class DummyClassifierModel(BaseClassifier):
+    def __init__(self):
+        super().__init__()
+        self.model = DummyClassifier()
+
+
+class XGBoostClassifier(BaseClassifier):
     def __init__(self, params: Dict = None, fname: str = None, device: str = 'cpu'):
+        super().__init__()
         if fname is not None:
             self.model = xgb.XGBClassifier(device=device)
             self.model.load_model(fname)
@@ -23,6 +57,7 @@ class XGBoostClassifier:
                     'num_class': 3,
                     'early_stopping_rounds': 10,
                     'tree_method': 'hist',
+                    'enable_categorical': True,
                     'device': device
                 }
             else:
@@ -30,7 +65,7 @@ class XGBoostClassifier:
 
             self.model = None
 
-    def fit(self, train_set: Tuple, val_set: Tuple):
+    def fit(self, train_set: Tuple, val_set: Tuple, target_names: Iterable = None):
         if self.model is None:
             self.model = xgb.XGBClassifier(**self.params)
 
@@ -46,32 +81,11 @@ class XGBoostClassifier:
             verbose=False
         )
 
-        ytr_pred = self.model.predict(Xtr)
-        yvl_pred = self.model.predict(Xvl)
-
-        self.training_results = {
-            'accuracy': {
-                'train': accuracy_score(ytr, ytr_pred), 
-                'val': accuracy_score(yvl, yvl_pred)
-            },
-            'precision': {
-                'train': precision_score(ytr, ytr_pred, average='weighted'),
-                'val': precision_score(yvl, yvl_pred, average='weighted')
-            },
-            'recall': {
-                'train': recall_score(ytr, ytr_pred, average='weighted'),
-                'val': recall_score(yvl, yvl_pred, average='weighted')
-            },
-            'f1': {
-                'train': f1_score(ytr, ytr_pred, average='weighted'),
-                'val': f1_score(yvl, yvl_pred, average='weighted')
-            }
-        }
-
-        self.ytr_pred = ytr_pred
-        self.yvl_pred = yvl_pred
-   
-        print_json(self.training_results)
+        self.model.set_params(device='cpu')
+        print('Training Results:')
+        self.eval(Xtr, ytr, target_names)
+        print('\nValidation Results:')
+        self.eval(Xvl, yvl, target_names)
 
     def plot_training_curve(self):
         results = self.model.evals_result()
@@ -97,14 +111,3 @@ class XGBoostClassifier:
 
     def save_model(self, fname):
         self.model.save_model(fname)
-
-    def eval(self, X, y, target_names=None):
-        y_pred = self.model.predict(X)
-        self.eval_results = {
-            'accuracy': accuracy_score(y, y_pred),
-            'precision': precision_score(y, y_pred, average='weighted'),
-            'recall': recall_score(y, y_pred, average='weighted'),
-            'f1': f1_score(y, y_pred, average='weighted')
-        }
-        print_json(self.eval_results)
-        print(classification_report(y, y_pred, target_names=target_names))

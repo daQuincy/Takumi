@@ -78,3 +78,12 @@ def create_correlation_heatmap(df):
 def print_json(data):
     data = json.dumps(data, indent=2)
     print(data)
+
+def print_dictionary_tree(dictionary, indent=0):
+    for key, value in dictionary.items():
+        print(f"{'  ' * indent}{key}:")
+        if isinstance(value, dict):
+            print_dictionary_tree(value, indent + 1)
+            print()
+        else:
+            print(f"{'  ' * (indent + 1)}{value}")
