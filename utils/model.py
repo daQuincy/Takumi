@@ -12,8 +12,9 @@ from sklearn.linear_model import LogisticRegression
 from tabulate import tabulate
 
 class BaseClassifier:
-    def __init__(self):
-        self.model = None
+    def __init__(self, params: Dict = {}):
+        self.params = params
+        self.model_type = None
     
     def eval(self, X, y, target_names=None):
         y_pred = self.model.predict(X)
@@ -27,6 +28,7 @@ class BaseClassifier:
         # print(classification_report(y, y_pred, target_names=target_names))
 
     def fit(self, train_set: Tuple, val_set: Tuple, target_names: Iterable = None):
+        self.model = self.model_type(**self.params)
         Xtr, ytr = train_set
         Xvl, yvl = val_set
         self.model.fit(Xtr, ytr)
@@ -38,12 +40,12 @@ class BaseClassifier:
 class DummyClassifierModel(BaseClassifier):
     def __init__(self):
         super().__init__()
-        self.model = DummyClassifier()
+        self.model = DummyClassifier
 
 class LogisticClassifier(BaseClassifier):
-    def __init__(self):
-        super().__init__()
-        self.model = LogisticRegression()
+    def __init__(self, params):
+        super().__init__(params)
+        self.model = LogisticRegression
 
 class XGBoostClassifier(BaseClassifier):
     def __init__(self, params: Dict = None, fname: str = None, device: str = 'cpu'):
