@@ -1,3 +1,4 @@
+from unittest.mock import Base
 import xgboost as xgb
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -7,6 +8,7 @@ from typing import List, Tuple, Dict, Iterable
 from sklearn.metrics import accuracy_score, precision_score, \
     recall_score, f1_score, classification_report
 from sklearn.dummy import DummyClassifier
+from sklearn.linear_model import LogisticRegression
 from tabulate import tabulate
 
 class BaseClassifier:
@@ -38,6 +40,10 @@ class DummyClassifierModel(BaseClassifier):
         super().__init__()
         self.model = DummyClassifier()
 
+class LogisticClassifier(BaseClassifier):
+    def __init__(self):
+        super().__init__()
+        self.model = LogisticRegression()
 
 class XGBoostClassifier(BaseClassifier):
     def __init__(self, params: Dict = None, fname: str = None, device: str = 'cpu'):
