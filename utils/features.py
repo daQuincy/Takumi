@@ -30,6 +30,8 @@ def create_z(
         df_day[f'std_{feature}_{lag_minute}m'] = std
         df_day[f'sma_{feature}_{lag_minute}m'] = mean
 
+        df_day = df_day.fillna(0)
+
         df_result.append(df_day)
 
     df_result = pd.concat(df_result)
@@ -66,7 +68,7 @@ def create_rsi(
         df_day = df_day.copy()
         for period in periods:
             df_day[f'rsi_{period}'] = ta.momentum.rsi(close=df_day['close'], window=period).copy()
-            df_day[f'rsi_{period}_signal'] = pd.cut(df_day[f'rsi_{period}'], bins=[0, 30, 70, 100])
+            df_day[f'rsi_{period}_signal'] = pd.cut(df_day[f'rsi_{period}'], bins=[0, 30, 70, 100], labels=[0, 1, 2], ordered=False)
 
         df_result.append(df_day)
 
@@ -99,6 +101,7 @@ def create_dst(
             df_day[f'dst_mean_high_{period_minute}m'] = (mean - high) / high
             df_day[f'dst_mean_low_{period_minute}m'] = (mean - low) / low
 
+        df_day = df_day.fillna(0)
         df_result.append(df_day)
 
     df_result = pd.concat(df_result)
