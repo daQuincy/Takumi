@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+import json
 import pytz
 
 def read_bm_data(file_path):
@@ -73,3 +74,29 @@ def create_correlation_heatmap(df):
     correlations = df.corr()
     sns.heatmap(correlations, annot=True, cmap='coolwarm')
     plt.show()
+
+def print_json(data):
+    data = json.dumps(data, indent=2)
+    print(data)
+
+def print_dictionary_tree(dictionary, indent=0):
+    for key, value in dictionary.items():
+        print(f"{'  ' * indent}{key}:")
+        if isinstance(value, dict):
+            print_dictionary_tree(value, indent + 1)
+            print()
+        else:
+            print(f"{'  ' * (indent + 1)}{value}")
+
+def day_aware_shift(df, column, shift):
+    df2 = []
+    for day, df_day in df.groupby(pd.Grouper(key='datetime', freq='D')):
+        if df_day.shape[0] == 0:
+            continue
+        df_day = df_day.copy()
+        df_day[column] = df_day[column].shift(shift).values
+        df2.append(df_day)
+
+    df2 = pd.concat(df2)
+
+    return df2

@@ -17,7 +17,7 @@ def create_z(
     feature: str = 'close'
 ):
     df_result = []
-    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D'))):
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc=f'z_{lag_minute}'):
         if df_day.shape[0] == 0:
             continue
         df_day = df_day.copy()
@@ -29,6 +29,8 @@ def create_z(
         df_day[f'pct_{feature}_{lag_minute}m'] = (df_day[feature] - mean) / mean
         df_day[f'std_{feature}_{lag_minute}m'] = std
         df_day[f'sma_{feature}_{lag_minute}m'] = mean
+
+        df_day = df_day.fillna(0)
 
         df_result.append(df_day)
 
@@ -51,7 +53,7 @@ def create_lag(
 
     df_lag = pd.DataFrame({'datetime': fast_forward_time, feature_name: df[feature].copy()})
     df = pd.merge(df, df_lag, on='datetime', how='left')
-    df[feature_name] = df[feature_name].fillna(0)
+    # df[feature_name] = df[feature_name].fillna(0)
 
     return df
 
@@ -60,12 +62,13 @@ def create_rsi(
     periods: List[int]
 ):
     df_result = []
-    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D'))):
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc='rsi'):
         if df_day.shape[0] == 0:
             continue
         df_day = df_day.copy()
         for period in periods:
-            df_day[f'rsi_{period}'] = ta.momentum.rsi(close=df_day['close'], window=period).copy() / 100
+            df_day[f'rsi_{period}'] = ta.momentum.rsi(close=df_day['close'], window=period).copy()
+            df_day[f'rsi_{period}_signal'] = pd.cut(df_day[f'rsi_{period}'], bins=[0, 30, 70, 100], labels=[0, 1, 2], ordered=False)
 
         df_result.append(df_day)
 
@@ -83,7 +86,7 @@ def create_dst(
     """
 
     df_result = []
-    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D'))):
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc='dst'):
         if df_day.shape[0] == 0:
             continue
         
@@ -98,6 +101,7 @@ def create_dst(
             df_day[f'dst_mean_high_{period_minute}m'] = (mean - high) / high
             df_day[f'dst_mean_low_{period_minute}m'] = (mean - low) / low
 
+        df_day = df_day.fillna(0)
         df_result.append(df_day)
 
     df_result = pd.concat(df_result)
@@ -111,14 +115,37 @@ def create_ma_ratio(
     feature: str = 'close'
 ):
     df_result = []
-    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D'))):
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc=f'ma_ratio_{short}_{long}'):
         if df_day.shape[0] == 0:
             continue
         
         df_day = df_day.copy()
         ma_short = df_day[feature].rolling(short).mean()
         ma_long = df_day[feature].rolling(long).mean()
-        df_day[f'ma_ratio_{short}_{long}'] = (ma_short / ma_long).fillna(0)
+        df_day[f'ma_ratio_{short}_{long}'] = (ma_short / ma_long)
+
+        df_result.append(df_day)
+    
+    df_result = pd.concat(df_result)
+
+    return df_result
+
+def create_bollinger_band(
+    df: pd.DataFrame,
+    period: int
+):
+    df_result = []
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc=f'bollinger_band_{period}'):
+        if df_day.shape[0] == 0:
+            continue
+        
+        df_day = df_day.copy()
+        indicator_bb = ta.volatility.BollingerBands(close=df_day['close'], window=period)
+        high = indicator_bb.bollinger_hband()
+        low = indicator_bb.bollinger_lband()
+
+        df_day['bb_high'] = high.sub(df_day.close).div(high).apply(np.log1p)
+        df_day['bb_low'] = low.sub(df_day.close).div(low).apply(np.log1p)
 
         df_result.append(df_day)
     
