@@ -17,7 +17,7 @@ def create_z(
     feature: str = 'close'
 ):
     df_result = []
-    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc=f'z_{lag_minute}'):
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc=f'z_{lag_minute} {feature}'):
         if df_day.shape[0] == 0:
             continue
         df_day = df_day.copy()
@@ -30,7 +30,7 @@ def create_z(
         df_day[f'std_{feature}_{lag_minute}m'] = std
         df_day[f'sma_{feature}_{lag_minute}m'] = mean
 
-        df_day = df_day.fillna(0)
+        # df_day = df_day.fillna(0)
 
         df_result.append(df_day)
 
@@ -43,19 +43,21 @@ def create_lag(
     feature: str,
     lag_minute: int
 ):
-    timestamp = df['datetime'].copy()
-    fast_forward_time = timestamp + pd.Timedelta(minutes=lag_minute)
-    fast_forward_time = fast_forward_time.dt.tz_convert(ny_tz)
-
     feature_name = 'lag'
     feature_name = f'{feature_name}{lag_minute}m'
     feature_name = f'{feature_name}_{feature}'
 
-    df_lag = pd.DataFrame({'datetime': fast_forward_time, feature_name: df[feature].copy()})
-    df = pd.merge(df, df_lag, on='datetime', how='left')
-    # df[feature_name] = df[feature_name].fillna(0)
+    df2 = []
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc=feature_name):
+        if df_day.shape[0] == 0:
+            continue
+        df_day = df_day.copy()
+        df_day[feature_name] = df_day[feature].shift(lag_minute).values
+        df2.append(df_day)
 
-    return df
+    df2 = pd.concat(df2)
+
+    return df2
 
 def create_rsi(
     df: pd.DataFrame,
@@ -101,7 +103,7 @@ def create_dst(
             df_day[f'dst_mean_high_{period_minute}m'] = (mean - high) / high
             df_day[f'dst_mean_low_{period_minute}m'] = (mean - low) / low
 
-        df_day = df_day.fillna(0)
+        # df_day = df_day.fillna(0)
         df_result.append(df_day)
 
     df_result = pd.concat(df_result)
