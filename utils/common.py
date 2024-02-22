@@ -88,13 +88,14 @@ def print_dictionary_tree(dictionary, indent=0):
         else:
             print(f"{'  ' * (indent + 1)}{value}")
 
-def day_aware_shift(df, column, shift):
+def day_aware_shift(df, column, shift, column2=None):
     df2 = []
+    if column2 is None: column2 = column
     for day, df_day in df.groupby(pd.Grouper(key='datetime', freq='D')):
         if df_day.shape[0] == 0:
             continue
         df_day = df_day.copy()
-        df_day[column] = df_day[column].shift(shift).values
+        df_day[column2] = df_day[column].shift(shift).values
         df2.append(df_day)
 
     df2 = pd.concat(df2)

@@ -3,6 +3,7 @@ invoice/
 *.ipynb_checkpoints/
 *__pycache__/
 *.nasdaq_key
-large_files/
+large_files
 reference/
 outputs/
+catboost_info/

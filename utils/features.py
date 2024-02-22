@@ -69,7 +69,7 @@ def create_rsi(
             continue
         df_day = df_day.copy()
         for period in periods:
-            df_day[f'rsi_{period}'] = ta.momentum.rsi(close=df_day['close'], window=period).copy()
+            df_day[f'rsi_{period}'] = ta.momentum.rsi(close=df_day['close'], window=period).copy() / 100
             df_day[f'rsi_{period}_signal'] = pd.cut(df_day[f'rsi_{period}'], bins=[0, 30, 70, 100], labels=[0, 1, 2], ordered=False)
 
         df_result.append(df_day)
@@ -97,11 +97,11 @@ def create_dst(
             high = df_day[feature].rolling(period_minute).max()
             low = df_day[feature].rolling(period_minute).min()
             mean = df_day[feature].rolling(period_minute).mean()
-            df_day[f'dst_high_{period_minute}m'] = (df_day[feature] - high) / high
-            df_day[f'dst_low_{period_minute}m'] = (df_day[feature] - low) / low
-            df_day[f'dst_mean_{period_minute}m'] = (df_day[feature] - mean) / mean
-            df_day[f'dst_mean_high_{period_minute}m'] = (mean - high) / high
-            df_day[f'dst_mean_low_{period_minute}m'] = (mean - low) / low
+            df_day[f'dst_{feature}_high_{period_minute}m'] = (df_day[feature] - high) / high
+            df_day[f'dst_{feature}_low_{period_minute}m'] = (df_day[feature] - low) / low
+            df_day[f'dst_{feature}_mean_{period_minute}m'] = (df_day[feature] - mean) / mean
+            df_day[f'dst_{feature}_mean_high_{period_minute}m'] = (mean - high) / high
+            df_day[f'dst_{feature}_mean_low_{period_minute}m'] = (mean - low) / low
 
         # df_day = df_day.fillna(0)
         df_result.append(df_day)
@@ -112,19 +112,19 @@ def create_dst(
 
 def create_ma_ratio(
     df: pd.DataFrame,
-    short: int,
-    long: int,
+    slow: int,
+    fast: int,
     feature: str = 'close'
 ):
     df_result = []
-    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc=f'ma_ratio_{short}_{long}'):
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc=f'ma_ratio_{slow}_{fast}'):
         if df_day.shape[0] == 0:
             continue
         
         df_day = df_day.copy()
-        ma_short = df_day[feature].rolling(short).mean()
-        ma_long = df_day[feature].rolling(long).mean()
-        df_day[f'ma_ratio_{short}_{long}'] = (ma_short / ma_long)
+        ma_slow = df_day[feature].rolling(slow).mean()
+        ma_fast = df_day[feature].rolling(fast).mean()
+        df_day[f'ma_ratio_{slow}_{fast}'] = (ma_slow / ma_fast)
 
         df_result.append(df_day)
     
@@ -146,11 +146,88 @@ def create_bollinger_band(
         high = indicator_bb.bollinger_hband()
         low = indicator_bb.bollinger_lband()
 
-        df_day['bb_high'] = high.sub(df_day.close).div(high).apply(np.log1p)
-        df_day['bb_low'] = low.sub(df_day.close).div(low).apply(np.log1p)
+        df_day[f'bb_{period}_high'] = high.sub(df_day.close).div(high).apply(np.log1p)
+        df_day[f'bb_{period}_low'] = low.sub(df_day.close).div(low).apply(np.log1p)
 
         df_result.append(df_day)
     
+    df_result = pd.concat(df_result)
+
+    return df_result
+
+
+def create_money_flow_index(
+    df: pd.DataFrame,
+    window: int
+):
+    df_result = []
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc=f'mfi_{window}'):
+        if df_day.shape[0] == 0:
+            continue
+        
+        df_day = df_day.copy()
+        df_day[f'mfi_{window}'] = ta.volume.money_flow_index(df_day.high, df_day.low, df_day.close, window) / 100
+
+        df_result.append(df_day)
+
+    df_result = pd.concat(df_result)
+
+    return df_result
+
+def create_macd_diff(
+    df: pd.DataFrame,
+    slow: int,
+    fast: int,
+    window: int 
+):
+    df_result = []
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc=f'macd_diff{window}_{slow}_{fast}'):
+        if df_day.shape[0] == 0:
+            continue
+        
+        df_day = df_day.copy()
+        df_day[f'macd_diff{window}_{slow}_{fast}'] = ta.trend.macd_diff(df_day.close, slow, fast, window)
+
+        df_result.append(df_day)
+
+    df_result = pd.concat(df_result)
+
+    return df_result
+
+def create_ppo(
+    df: pd.DataFrame,
+    slow: int,
+    fast: int,
+    window: int 
+):
+    df_result = []
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc=f'ppo{window}_{slow}_{fast}'):
+        if df_day.shape[0] == 0:
+            continue
+        
+        df_day = df_day.copy()
+        df_day[f'ppo{window}_{slow}_{fast}'] = ta.momentum.ppo(df_day.close)
+        df_result.append(df_day)
+
+    df_result = pd.concat(df_result)
+
+    return df_result
+
+def create_pvo(
+    df: pd.DataFrame,
+    slow: int,
+    fast: int,
+    window: int 
+):
+    df_result = []
+    for day, df_day in tqdm.tqdm(df.groupby(pd.Grouper(key='datetime', freq='D')), desc=f'pvo{window}_{slow}_{fast}'):
+        if df_day.shape[0] == 0:
+            continue
+        
+        df_day = df_day.copy()
+        df_day[f'pvo{window}_{slow}_{fast}'] = ta.momentum.pvo(df_day.volume)
+        df_result.append(df_day)
+
     df_result = pd.concat(df_result)
 
     return df_result
