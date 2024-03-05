@@ -101,3 +101,9 @@ def day_aware_shift(df, column, shift, column2=None):
     df2 = pd.concat(df2)
 
     return df2
+
+def backtrader_plot(cerebro):
+    # https://www.roelpeters.be/how-to-use-backtrader-plots-in-python-notebooks/
+    plt.rcParams['figure.figsize'] = [15, 12]
+    plt.rcParams.update({'font.size': 12}) 
+    cerebro.plot(iplot = False)
