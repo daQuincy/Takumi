@@ -7,3 +7,4 @@ large_files
 reference/
 outputs/
 catboost_info/
+tmp/
