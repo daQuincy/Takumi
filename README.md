@@ -7,8 +7,8 @@
 Didn't worked well in initial experiments as performance is not much better than random guessing / baseline.
 
 ## Mean Reversion
-__Idea__
-![alt text](images/mean_rev_check1.png)
+__Idea__  
+![alt text](images/mean_rev_check1.png)  
 Z-score usually spike/drop significantly around 1030 ET, around the time of report release. Has the tendency to revert back to mean.
 
 __Strategy 1__  
