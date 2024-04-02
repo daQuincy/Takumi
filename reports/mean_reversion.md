@@ -93,3 +93,37 @@ Results
 | 2021     | 0.9414 |
 | 2022     | 6.5452 |
 | 2023     | 5.8035 |
+
+__Strategy 3 (Cheat)__  
+Entry:  
+- On Wednesday, between 1025 and 1035, find max / min z-score and go short / long accordingly.  
+
+Exit:  
+- Search for peak / bottom price after opening position and close.
+
+Tested on 2020 - 2023
+
+Parameters
+| Parameter           | Value |
+|---------------------|-------|
+| z-score window      | 30    |
+| long entry z-score  | -3.0  |
+| short entry z-score | 2.0   |
+
+Results
+| Metric                 | Value  |
+|------------------------|--------|
+| Total Return [%]       | 106.52 |
+| Total Trades           | 79     |
+| Win Rate [%]           | 97.47  |
+| Avg Winning Trade [%]  | 0.95   |
+| Avg Losing Trade [%]   | -0.037 |
+| Sharpe Ratio           | 34.32  |
+| Annualized Returns [%] | 30.42  |
+
+| datetime | Return [%] |
+|:---------|-------:|
+| 2020     | 28.63  |
+| 2021     | 17.85  |
+| 2022     | 20.26  |
+| 2023     | 13.28  |
