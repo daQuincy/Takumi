@@ -1,5 +1,10 @@
 # Pairs Trading
 
+## Idea  
+- Theoretically, ratio between oil and gold price should be constant over time.
+- Visually, it is shown that when price of oil and gold diverges they will revert.
+![alt text](../images/cl-gc-cointegration.png)
+
 ## __Strategy 1 (cheat)__
 Entry:  
 - Compute spread between CL and GC  (CL - hedge_ratio * GC).
