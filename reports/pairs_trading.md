@@ -4,8 +4,10 @@
 Entry:  
 - Compute spread between CL and GC  (CL - hedge_ratio * GC).
 - Compute z-score. Parameters of z-score (mean, std) are computed using spread on Monday and Tuesday.
-- If z-score of spread <-2.0, short CL long GC, vice versa
-- Exit when z-score reverts 0 or if time is 1159 (or 1559).   
+- If z-score of spread <-2.0, short CL long GC, vice versa  
+
+Exit:  
+- Exit at the time when z-score is closest to 0.   
 
 <table>
 <tr><th> Ends at 1159 </th><th> Ends at 1559 </th></tr>
@@ -80,4 +82,47 @@ Entry:
 
 Notes:  
 - Noticed that trades close within an hour, not enough time for spread to revert?
-- Apparently not, positions are usually opened between 0900 and 1000.
+- Apparently not, positions are usually opened between 0900 and 1000.  
+- Oil trades do no profit, price is not going the right direction when spread reverts?
+- Win rate of oil trades is <50% 
+
+## __Strategy 2__  
+Entry:  
+- Compute spread between CL and GC  (CL - hedge_ratio * GC).
+- Compute z-score. Parameters of z-score (mean, std) are computed using spread on Monday and Tuesday.
+- If z-score of spread <-2.0, short CL long GC, vice versa    
+
+Exit:  
+- Exit when z-score breaks 0
+- OR if time is 1659  
+
+|                            | WTI Crude                 | Gold                      |
+|:---------------------------|:--------------------------|:--------------------------|
+| Start                      | 2020-01-08 09:00:00-05:00 | 2020-01-08 09:00:00-05:00 |
+| End                        | 2023-12-27 15:59:00-05:00 | 2023-12-27 15:59:00-05:00 |
+| Period                     | 60 days 16:00:00          | 60 days 16:00:00          |
+| Start Value                | 100.0                     | 100.0                     |
+| End Value                  | 81.717                    | 103.261                   |
+| Total Return [%]           | -18.283                   | 3.261                     |
+| Benchmark Return [%]       | 19.444                    | 32.457                    |
+| Max Gross Exposure [%]     | 146.823                   | 103.424                   |
+| Total Fees Paid            | 0.0                       | 0.0                       |
+| Max Drawdown [%]           | 35.311                    | 8.499                     |
+| Max Drawdown Duration      | 56 days 05:14:00          | 44 days 21:03:00          |
+| Total Trades               | 157                       | 157                       |
+| Total Closed Trades        | 157                       | 157                       |
+| Total Open Trades          | 0                         | 0                         |
+| Open Trade PnL             | 0.0                       | 0.0                       |
+| Win Rate [%]               | 42.038                    | 58.599                    |
+| Best Trade [%]             | 35.341                    | 1.155                     |
+| Worst Trade [%]            | -6.474                    | -1.994                    |
+| Avg Winning Trade [%]      | 1.409                     | 0.333                     |
+| Avg Losing Trade [%]       | -1.057                    | -0.418                    |
+| Avg Winning Trade Duration | 0 days 02:24:51.818181818 | 0 days 02:08:52.826086956 |
+| Avg Losing Trade Duration  | 0 days 02:14:27.333333333 | 0 days 02:33:36           |
+| Profit Factor              | 0.807                     | 1.121                     |
+| Expectancy                 | -0.123                    | 0.021                     |
+| Sharpe Ratio               | -2.064                    | 1.281                     |
+| Calmar Ratio               | -1.992                    | 2.506                     |
+| Omega Ratio                | 0.981                     | 1.01                      |
+| Sortino Ratio              | -2.916                    | 1.81                      |
