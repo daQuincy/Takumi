@@ -9,7 +9,9 @@ Didn't worked well in initial experiments as performance is not much better than
 
 The Compound Annual Growth Rate (CAGR) is a measure of the annual growth rate of an investment over a specified time period. It is calculated using the following formula:
 
-CAGR = (Ending Value / Beginning Value)^(1/n) - 1
+total_return = (Ending Value - Beginning Value) 
+weekly_return = total_return / (n_weeks_per_year * n_years)  
+CAGR = ((1 + weekly_return) ^ n_weeks_per_year) - 1
 
 Where:
 - Ending Value is the ending value of the investment.
