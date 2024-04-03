@@ -11,7 +11,7 @@ __Idea__
 ![alt text](../images/mean_rev_check1.png)  
 Z-score usually spike/drop significantly around 1030 ET, around the time of report release. Has the tendency to revert back to mean.
 
-__Strategy 1__  
+### __Strategy 1__  
 Entry:  
 - Wednesday
 - Time between 1025 and 1035 AND z-score is below / above threshold, go long / short.  
@@ -23,7 +23,10 @@ Exit:
 
 Tested 2020 - 2023
 
-Parameters
+<table>
+<tr><th> Parameters </th><th>Results</th><th>Yearly</th></tr>
+<tr><td>
+
 | Parameter           | Value |
 |---------------------|-------|
 | z-score window      | 30    |
@@ -34,7 +37,8 @@ Parameters
 | long exit z-score   | 0.0   |
 | short exit z-score  | 0.0   |
 
-Results
+</td><td>
+
 | Metric                 | Value |
 |------------------------|-------|
 | Total Return [%]       | 17.86 |
@@ -45,6 +49,9 @@ Results
 | Sharpe Ratio           | 11.84 |
 | Annualized Returns [%] | 4.56  |
 
+
+</td><td>  
+
 | datetime | Return [%] |
 |:---------|-------:|
 | 2020     | 4.9871 |
@@ -52,7 +59,9 @@ Results
 | 2022     | 8.15   |
 | 2023     | 1.2094 |
 
-__Strategy 2__  
+</td></tr> </table>
+
+### __Strategy 2__  
 Entry:  
 - Wednesday
 - Time between 1025 and 1035 AND z-score is below / above threshold, go long / short.  
@@ -64,7 +73,10 @@ Exit:
 
 Tested on 2020 - 2023
 
-Parameters
+<table>
+<tr><th> Parameters </th><th>Results</th><th>Yearly</th></tr>
+<tr><td>
+
 | Parameter           | Value |
 |---------------------|-------|
 | z-score window      | 30    |
@@ -76,7 +88,8 @@ Parameters
 | short exit z-score  | 0.0   |
 | initial time        | 60 min|
 
-Results
+</td><td>
+
 | Metric                 | Value  |
 |------------------------|--------|
 | Total Return [%]       | 24.75  |
@@ -87,6 +100,8 @@ Results
 | Sharpe Ratio           | 4.25   |
 | Annualized Returns [%] | 6.38   |
 
+</td><td>  
+
 | datetime | Return [%] |
 |:---------|-------:|
 | 2020     | 9.6372 |
@@ -94,7 +109,10 @@ Results
 | 2022     | 6.5452 |
 | 2023     | 5.8035 |
 
-__Strategy 3 (Cheat)__  
+</td></tr> </table>
+
+
+### __Strategy 3 (Cheat)__  
 Entry:  
 - On Wednesday, between 1025 and 1035, find max / min z-score and go short / long accordingly.  
 
