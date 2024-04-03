@@ -103,14 +103,18 @@ Exit:
 
 Tested on 2020 - 2023
 
-Parameters
+<table>
+<tr><th> Parameters </th><th>Results</th><th>Yearly</th></tr>
+<tr><td>
+
 | Parameter           | Value |
 |---------------------|-------|
 | z-score window      | 30    |
 | long entry z-score  | -3.0  |
 | short entry z-score | 2.0   |
 
-Results
+</td><td>
+
 | Metric                 | Value  |
 |------------------------|--------|
 | Total Return [%]       | 106.52 |
@@ -121,9 +125,13 @@ Results
 | Sharpe Ratio           | 34.32  |
 | Annualized Returns [%] | 30.42  |
 
+</td><td>  
+
 | datetime | Return [%] |
 |:---------|-------:|
 | 2020     | 28.63  |
 | 2021     | 17.85  |
 | 2022     | 20.26  |
 | 2023     | 13.28  |
+
+</td></tr> </table>
