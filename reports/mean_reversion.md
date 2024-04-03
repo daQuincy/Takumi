@@ -6,6 +6,21 @@
 
 Didn't worked well in initial experiments as performance is not much better than random guessing / baseline.
 
+## Metrics
+### Compound Annual Growth Rate (CAGR)
+
+The Compound Annual Growth Rate (CAGR) is a measure of the annual growth rate of an investment over a specified time period. It is calculated using the following formula:
+
+\[CAGR = \left( \frac{{\text{Ending Value}}}{{\text{Beginning Value}}} \right)^\frac{1}{n} - 1\]
+
+Where:
+- \(\text{Ending Value}\) is the ending value of the investment.
+- \(\text{Beginning Value}\) is the initial value of the investment.
+- \(n\) is the number of years.
+
+To calculate the CAGR, subtract 1 from the result obtained from raising the ratio of the ending value to the beginning value to the power of the reciprocal of the number of years, and then multiply by 100 to express the result as a percentage.
+
+
 ## Mean Reversion
 __Idea__  
 ![alt text](../images/mean_rev_check1.png)  
