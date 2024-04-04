@@ -45,9 +45,6 @@ Exit:
 | Profit Factor              | 1.05                      | 45.665                    |
 | Expectancy                 | 0.018                     | 0.593                     |
 | Sharpe Ratio               | 1.249                     | 57.691                    |
-| Calmar Ratio               | 5.461                     | 2042861.138               |
-| Omega Ratio                | 1.011                     | 1.544                     |
-| Sortino Ratio              | 1.974                     | 98.898                    |
 
 </td><td>
 
