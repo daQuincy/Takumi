@@ -18,8 +18,6 @@ Where:
 - Beginning Value is the initial value of the investment.
 - n is the number of years.
 
-To calculate the CAGR, subtract 1 from the result obtained from raising the ratio of the ending value to the beginning value to the power of the reciprocal of the number of years, and then multiply by 100 to express the result as a percentage.
-
 
 ## Mean Reversion
 __Idea__  
