@@ -5,7 +5,7 @@ from AlgorithmImports import *
 class EnergeticFluorescentOrangeShark(QCAlgorithm):
 
     def Initialize(self):
-        self.set_start_date(2023, 8, 1)
+        self.set_start_date(2020, 1, 1)
         self.set_end_date(2023, 12, 31)
         self.set_cash(100000)
     
@@ -13,13 +13,19 @@ class EnergeticFluorescentOrangeShark(QCAlgorithm):
             Futures.Energies.CRUDE_OIL_WTI,
             data_normalization_mode=DataNormalizationMode.BACKWARDS_RATIO,
             data_mapping_mode=DataMappingMode.LAST_TRADING_DAY,
-            contract_depth_offset=0
+            contract_depth_offset=0,
+            resolution=Resolution.MINUTE
         )
 
-        # self.sma_fast = self.sma(self.continuous_contract.symbol, 5, Resolution.Hour)
-        # self.sma_slow = self.sma(self.continuous_contract.symbol, 15, Resolution.Hour)
+        self.window = 30
+        self.long_entry = -2.0
+        self.short_entry = 2.0
+        self.long_exit = 0
+        self.short_exit = 0
 
-        self.window = 20
+        # self.sma_fast = self.sma(self.continuous_contract.symbol, 5, Resolution.MINUTE)
+        # self.sma_slow = self.sma(self.continuous_contract.symbol, 15, Resolution.MINUTE)
+
         self.moving_average = self.sma(self.continuous_contract.symbol, self.window, Resolution.MINUTE)
         self.standard_deviation = self.std(self.continuous_contract.symbol, self.window, Resolution.MINUTE)
         self.current_contract = None
@@ -34,6 +40,15 @@ class EnergeticFluorescentOrangeShark(QCAlgorithm):
     def on_securities_changed(self, changes):
         self.debug(f"{self.time} -- {changes}")
 
+    def compute_z_score(self):
+        adjusted_price = self.securities[self.continuous_contract.symbol].price
+        if self.standard_deviation.current.value == 0:
+            z_score = 0
+        else:
+            z_score = (adjusted_price - self.moving_average.current.value) / self.standard_deviation.current.value
+
+        return z_score
+
     def on_data(self, slice):
         if self.is_warming_up:
             return
@@ -44,31 +59,23 @@ class EnergeticFluorescentOrangeShark(QCAlgorithm):
         
         if not self.portfolio.invested:
             self.current_contract = self.securities[self.continuous_contract.mapped]
-            if self.standard_deviation.current.value == 0:
-                    z_score = 0
-            else:
-                z_score = (self.current_contract.close - self.moving_average.current.value) / self.standard_deviation.current.value
-
-            if self.time.hour == 10 and (self.time.minute > 25 and self.time.minute < 35): 
-                if z_score < -2.0:
+            if (self.time.hour == 10) and (self.time.minute > 25 and self.time.minute < 35) and (self.time.weekday() == 2):
+                z_score = self.compute_z_score()
+                if z_score < self.long_entry:
                     self.set_holdings(self.current_contract.symbol, 1)
-                elif z_score > 2.0:
+                elif z_score > self.short_entry:
                     self.set_holdings(self.current_contract.symbol, -1)
 
         else:
-            self.current_contract = self.securities[self.continuous_contract.mapped]
-            if self.standard_deviation.current.value == 0:
-                z_score = 0
-            else:
-                z_score = (self.current_contract.close - self.moving_average.current.value) / self.standard_deviation.current.value
-
+            
+            z_score = self.compute_z_score()
             if self.portfolio[self.current_contract.symbol].is_long:
-                if z_score > 0:
+                if z_score > self.long_exit:
                     self.liquidate()
             elif self.portfolio[self.current_contract.symbol].is_short:
-                if z_score < 0:
+                if z_score < self.short_exit:
                     self.liquidate()
-            elif self.time.hour == 12:
+            elif (self.time.hour == 12 and self.time.weekday() == 2):
                 self.liquidate()
 
         # Checks if the current_contract is not the same as the contract currently mapped by the continuous future contract. 
